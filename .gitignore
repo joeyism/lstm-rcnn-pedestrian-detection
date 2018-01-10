@@ -9,3 +9,6 @@ log/
 current-model.ckpt
 current-model.ckpt.meta
 checkpoint
+
+#vim
+*.swp

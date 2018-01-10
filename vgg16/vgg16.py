@@ -74,7 +74,7 @@ class VGG16D(VGG16):
         return variables
 
     def build(self, X):
-        input_data = tf.sub(X, VGG16.VGG_MEAN)
+        input_data = tf.subtract(X, VGG16.VGG_MEAN)
 
         with tf.variable_scope('VGG16D'):
             # First, two conv3-64

@@ -144,7 +144,7 @@ class CaltechDataset:
         # Select a portion of the training set for validation
         random.seed(CaltechDataset.RANDOM_SEED) # For reproducibility
         indices = range(len(training))
-        random.shuffle(indices)
+        random.shuffle(list(indices))
         num_training = len(training) - int(float(len(training)) * CaltechDataset.VALIDATION_RATIO)
 
         self.training = [training[i] for i in sorted(indices[:num_training])]
