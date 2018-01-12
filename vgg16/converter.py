@@ -35,6 +35,4 @@ if __name__ == '__main__':
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
 
-        save_path = saver.save(sess, 'VGG16D.ckpt')
-        os.remove('checkpoint')
-        os.remove('VGG16D.ckpt.meta')
+        save_path = saver.save(sess, './VGG16D.ckpt')

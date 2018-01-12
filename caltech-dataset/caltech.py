@@ -167,7 +167,7 @@ class CaltechDataset:
             self.shuffle_training()
 
         if clas_negative.shape[1] > CaltechDataset.MINIBATCH_SIZE / 2:
-            selected = np.random.choice(clas_negative.shape[1], CaltechDataset.MINIBATCH_SIZE / 2, replace = False)
+            selected = np.random.choice(clas_negative.shape[1], int(CaltechDataset.MINIBATCH_SIZE / 2), replace = False)
             clas_negative = clas_negative[:, selected]
 
         if clas_positive.shape[1] > CaltechDataset.MINIBATCH_SIZE / 2:

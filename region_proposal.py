@@ -228,9 +228,9 @@ if __name__ == '__main__':
             print('VGG model restored from: {}.'.format(vgg_restore_path))
 
         # Start summary writers
-        train_writer = tf.train.SummaryWriter('log/train', sess.graph, flush_secs = 10)
-        valid_writer = tf.train.SummaryWriter('log/valid', flush_secs = 10)
-        test_writer = tf.train.SummaryWriter('log/test', flush_secs = 10)
+        train_writer = tf.summary.FileWriter('log/train', sess.graph, flush_secs = 10)
+        valid_writer = tf.summary.FileWriter('log/valid', flush_secs = 10)
+        test_writer = tf.summary.FileWriter('log/test', flush_secs = 10)
 
         if not full_restore_path:
             # Train the model first (and save it)
