@@ -4,7 +4,9 @@ import os, glob, json, time, random
 from math import ceil, floor, sqrt, exp
 
 import numpy as np
+import boto3
 from PIL import Image, ImageDraw
+from aws import S3
 
 def IoU(anchor_box, truth_box):
     (y1, x1, h1, w1) = anchor_box
@@ -91,14 +93,20 @@ class CaltechDataset:
         self.training_minibatch = 0
         self.validation_minibatch = 0
         self.testing_minibatch = 0
+        self.s3 = S3(boto3.client("s3"))
+        self.s3.bucket = "caltech-dataset"
 
         # self.set_training([(0, 1, 975), (3, 8, 240), (3, 8, 262), (3, 8, 279), (3, 8, 280), (3, 8, 293), (3, 8, 294), (3, 8, 295), (3, 8, 299), (3, 8, 300), (3, 8, 306), (3, 8, 308), (3, 8, 309), (3, 8, 313), (3, 8, 314), (3, 8, 315), (3, 8, 316), (3, 8, 317), (3, 8, 318), (3, 8, 321), (3, 8, 322), (3, 8, 326), (3, 8, 327), (3, 8, 334), (3, 8, 335), (3, 8, 336), (3, 8, 342), (3, 8, 345), (3, 8, 347), (3, 8, 348), (3, 8, 349), (3, 8, 350), (3, 8, 351), (3, 8, 358), (3, 8, 359), (3, 8, 360), (3, 8, 361), (3, 8, 362), (3, 8, 363), (3, 8, 364), (3, 8, 365), (3, 8, 368), (3, 8, 369), (3, 8, 370), (3, 8, 371), (3, 8, 372), (3, 8, 373), (3, 8, 374), (3, 8, 380), (3, 8, 381), (3, 8, 382), (3, 8, 391), (3, 8, 392), (3, 8, 393), (3, 8, 396), (3, 8, 397), (3, 8, 398), (3, 8, 401), (3, 8, 404), (3, 8, 410), (3, 8, 420), (3, 8, 427), (3, 8, 429), (3, 8, 430), (3, 8, 431), (3, 8, 434), (3, 8, 437), (3, 8, 443), (3, 8, 444), (3, 8, 451), (3, 8, 455), (3, 8, 456), (3, 8, 457), (3, 8, 458), (3, 8, 459), (3, 8, 460), (3, 8, 462), (3, 8, 466), (3, 8, 467), (3, 8, 478), (3, 8, 479), (3, 8, 480), (3, 8, 492), (3, 8, 493), (3, 8, 514), (3, 8, 515)])
         self.discover_training()
 
         self.discover_testing()
 
+    def download_s3_file(self, loc, bucket):
+        client = boto3.client('s3')
+
+
     def discover_seq(self, set_number, seq_number, skip_frames):
-        num_frames = len(glob.glob(self.dataset_location + '/images/set{:02d}/V{:03d}.seq/*.jpg'.format(set_number, seq_number)))
+        num_frames = len([filename if filename.endswith(".jpg") for filename in s3.get_file_and_folder_names(prefix="dataset/images/set{:02d}/V{:03d}.seq/".format(set_number, seq_number))])
 
         if skip_frames:
             num_frames = int(floor(num_frames / CaltechDataset.FRAME_MODULO))
@@ -108,7 +116,7 @@ class CaltechDataset:
             return [(set_number, seq_number, i) for i in range(num_frames)]
 
     def discover_set(self, set_number, skip_frames = False):
-        num_sequences = len(glob.glob(self.dataset_location + '/images/set{:02d}/V*.seq'.format(set_number)))
+        num_sequences = len(s3.get_file_and_folder_names(prefix="dataset/images/set{:02d}/V".format(set_number)))
 
         tuples = []
         for seq_number in range(num_sequences):
@@ -119,6 +127,7 @@ class CaltechDataset:
     def discover_training(self):
         training = []
         for set_number in range(5 + 1):
+            # download set
             training += self.discover_set(set_number, skip_frames = False)
 
         if CaltechDataset.TRAINING_SIZE == -1:
@@ -130,6 +139,7 @@ class CaltechDataset:
     def discover_testing(self):
         testing = []
         for set_number in range(6, 10 + 1):
+            # download set
             testing += self.discover_set(set_number, skip_frames = True)
 
         if CaltechDataset.TESTING_SIZE == -1:
