@@ -1,6 +1,8 @@
 import boto3
 import botocore
 import itertools
+import numpy as np
+import io
 
 class S3(object):
     client = None
@@ -38,4 +40,18 @@ class S3(object):
                 self.get_foldernames(bucket = bucket, prefix = prefix),
                 self.get_filenames(bucket = bucket, prefix = prefix)
                 ))
+    def get_object_body(self, filename, bucket=None):
+        if bucket == None:
+            bucket = self.bucket
+        return self.client.get_object(Bucket=bucket, Key=filename)["Body"]
+
+    def load_npy(self, filename, bucket=None):
+        if bucket == None:
+            bucket = self.bucket
+        arr = None
+        with io.BytesIO(self.get_object_body(filename, bucket=bucket).read()) as f:
+            f.seek(0)
+            arr = np.load(f)
+        return arr
+
 
