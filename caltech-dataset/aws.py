@@ -1,6 +1,5 @@
 import boto3
 import botocore
-import itertools
 import numpy as np
 import io
 
@@ -12,13 +11,21 @@ class S3(object):
         self.client = client
         self.bucket = bucket
 
+    def __get_list__(self, bucket, prefix, parent, child):
+        paginator = self.client.get_paginator('list_objects')
+        page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/")
+
+        result = []
+        for page in page_iterator:
+            result += [f[child] for f in page[parent]]
+        return result
+
     def get_foldernames(self, bucket=None, prefix = ""):
         if bucket == None:
             bucket = self.bucket
 
         try: 
-            folders = self.client.list_objects(Bucket=bucket, Prefix=prefix, Delimiter='/')["CommonPrefixes"]
-            return [ f["Prefix"] for f in folders]
+            return self.__get_list__(bucket, prefix, "CommonPrefixes", "Prefix")
         except:
             return []
 
@@ -27,8 +34,7 @@ class S3(object):
             bucket = self.bucket
 
         try:
-            files = self.client.list_objects(Bucket=bucket, Prefix=prefix, Delimiter='/')["Contents"]
-            return [ f["Key"] for f in files]
+            return self.__get_list__(bucket, prefix, "Contents", "Key")
         except:
             return []
 
@@ -36,10 +42,7 @@ class S3(object):
         if bucket == None:
             bucket = self.bucket
 
-        return list(itertools.chain(
-                self.get_foldernames(bucket = bucket, prefix = prefix),
-                self.get_filenames(bucket = bucket, prefix = prefix)
-                ))
+        return self.get_foldernames(bucket = bucket, prefix = prefix) + self.get_filenames(bucket = bucket, prefix = prefix)
     def get_object_body(self, filename, bucket=None):
         if bucket == None:
             bucket = self.bucket

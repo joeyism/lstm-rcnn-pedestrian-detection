@@ -12,6 +12,7 @@ current-model.ckpt.meta
 checkpoint
 vgg16/tensorflow-vgg16
 vgg16/tensorflow-vgg16/*
+vgg16/vgg16.npy
 
 #vim
 *.swp
